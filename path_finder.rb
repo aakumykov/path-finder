@@ -3,14 +3,22 @@ require 'rmagick'
 
 class PathFinder
 	@image
-	@angle_step
+	@search_radius
 	@radius_step
+
+	private
+		@angle_step
 
 	def initialize(image_file,opt={})
 		@image = Magick::Image.read(image_file).first
-		@angle_step = opt[:angle_step] || 0.1
 		@search_radius = opt[:search_radius] || 10
 		@radius_step = opt[:radius_step] || 1
+		
+		perimeter = @search_radius*2*Math::PI
+		puts "периметр: #{perimeter}"
+		
+		@angle_step = Math::PI / perimeter/2
+		puts "угловой шаг: #{@angle_step} (#{@angle_step*Math::PI/180})"
 	end
 
 	def find_path(x0,y0)
