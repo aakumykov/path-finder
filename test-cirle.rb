@@ -8,8 +8,8 @@ puts "R: #{R}, dA: #{dA}"
 
 img = Image.new(2*R,2*R) { self.background_color='paleturquoise' }
 #img.display
-$arc = Draw.new
-$arc.fill('black')
+$arc = Draw.new.fill('black')
+#$arc.fill('black')
 
 def calc_tan(a)
 	k = Math::tan(a)
@@ -24,12 +24,12 @@ def calc_tan(a)
 	$arc.line(R,R,x_real,y_real)
 
 	#puts "x: #{x.round*sign}\t y: #{y.round}\t a: #{a.round(3)}\t k: #{k.round(3)}\t sign:#{sign}"
-	puts "#{x_real}, #{y_real}, a: #{a.round(2)}"
+	puts "#{x_real}, #{y_real}, a: #{a.round(2)}, k: #{k}"
 	#puts "x: #{x.round(3)*sign},    y1: #{y1.round(3)},    y2: #{y2.round(3)},    #{y1.round(3)==y2.round(3)}"
 end
 
-a = a0
-while a <= (Math::PI) do
+a = Math::PI+a0
+while a <= (Math::PI*2) do
 	begin
 		calc_tan(a)
 	rescue
@@ -37,6 +37,8 @@ while a <= (Math::PI) do
 		a += dA
 	end
 end
+
+
 
 $arc.draw(img)
 #img.scale!(100,100)
