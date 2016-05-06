@@ -9,18 +9,22 @@ class PathFinder
 	end
 
 	def find_path(start_x, start_y, opt={})
+		puts "#{__method__}(#{start_x},#{start_y})"
+
 		# предварительная настройка
 		search_radius = opt.fetch(:radius,10)
 		@rays_template = calc_rays_template(search_radius)
 
 		# получение массива шагов
+		x,y = start_x, start_y
 		all_steps = []
 		
-		step = get_step(start_x,start_y)
-		all_steps << step
-		
-		while step = get_step(step[0],step[1])
+		puts ''
+		while step = get_step(x,y)
+			puts "step: #{step}"
 			all_steps << step
+			x,y = step[0],step[1]
+			puts ''
 		end
 		
 		return all_steps
@@ -48,48 +52,48 @@ class PathFinder
 
 			# получаю данные всех лучей
 			all_rays = get_all_rays(x,y)
-			
 			#puts "all_rays: #{all_rays}"
 
 			# нахожу "лучший"
-			detect_best_ray(all_rays)
+			best_ray = detect_best_ray(all_rays)
+			#puts "best_ray: #{best_ray}"
+
+			return best_ray
 		end
 
+		# возвращает массив хэшей
 		def get_all_rays(x0,y0)
-			puts "#{__method__}(#{x0},#{y0})"
+			#puts "#{__method__}(#{x0},#{y0})"
 			
 			rays = []
 			
-			one_ray = []
-			for ray in @rays_template do
-				for ray_dot in ray do
+			for one_ray in @rays_template do
+				
+				for ray_dot in one_ray do
+				
 					x = x0+ray_dot[0]
 					y = y0+ray_dot[1]
-					#puts "ray_dot: #{ray_dot}, #{x}, #{y}"
+					puts "ray_dot: #{ray_dot}, #{x}, #{y}"
 					
 					pix = @img.get_pixels(x,y,1,1).first
-					ray_data = pix.red + pix.green + pix.blue
-					one_ray << ray_data
+					
+					rays << { 
+						x: x, 
+						y: y, 
+						weight: pix.red + pix.green + pix.blue
+					}
 				end
-				rays << one_ray
-				one_ray = []
 			end
 
 			return rays
 		end
 
 		def detect_best_ray(rays_bunch)
-			puts "#{__method__}(#{rays_bunch})"
+			#puts "#{__method__}(#{rays_bunch})"
 
-			all_rays = []
+			ray = rays_bunch.first
 
-			rays_bunch.each { |ray|
-				all_rays << ray.inject(0){|sum,x| sum + x }
-			}
-
-			puts all_rays.inspect
-
-			[ all_rays.max, all_rays.min ]
+			[ray[:x], ray[:y]]
 		end
 end
 
@@ -103,4 +107,4 @@ end
 
 pf = PathFinder.new(img_file)
 path = pf.find_path(0,0)
-puts path.inspect
+puts "path: #{path.inspect}"
