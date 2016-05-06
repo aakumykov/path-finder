@@ -4,16 +4,17 @@ include Magick
 
 
 case ARGV.count
-when 3
+when 4
 	a1 = ARGV[0].to_f
 	a2 = ARGV[1].to_f
-	gK = ARGV[2].to_i
+	r = ARGV[2].to_i
+	gK = ARGV[3].to_i
 else
-	STDERR.write("Usage: #{__FILE__} a1 a2\n")
+	STDERR.write("Usage: #{__FILE__} a1 a2 r gK\n")
 	exit 1
 end
 
-r = 10
+#r = 20
 #gK = 10
 
 def g2r(n)
@@ -51,7 +52,7 @@ def fix_signs(angle,x,y)
 	end
 end
 
-dA = 360/(r*3)
+dA = 360/(r*2)
 #dA = 10
 x0 = r
 y0 = r
@@ -75,7 +76,8 @@ while a <= a2 do
 
 		x,y = fix_signs(a,x,y)
 
-		puts "a: #{a}\t k: #{k}\t x: #{x}\t y: #{y}"
+		#puts "a: #{a}\t k: #{k}\t x: #{x}\t y: #{y}"
+		puts "#{x}\t #{y}"
 
 		draw.line(gX0, gY0, (x0+x)*gK, (y0+y)*gK)
 	rescue
