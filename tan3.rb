@@ -77,7 +77,7 @@ while a <= a2 do
 		x,y = fix_signs(a,x,y)
 
 		#puts "a: #{a}\t k: #{k}\t x: #{x}\t y: #{y}"
-		puts "#{x}\t #{y}"
+		puts "x: #{x}\t y: #{y}"
 
 		draw.line(gX0, gY0, (x0+x)*gK, (y0+y)*gK)
 	rescue
