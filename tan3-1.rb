@@ -48,24 +48,58 @@ def calc_rays_template(radius,opt={})
 	end
 
 	# вычисления
-	a=angle_start
-	store = []
-	
-	while a <= angle_end do
-		begin
-			k = Math.tan( g2r(a) )
-			x = Math.sqrt( radius**2 / (k**2 + 1) )
-			y = k*x
+	all_rays = []
 
-			store << fix_signs(a,x,y)
-		rescue
-			puts "НЕТ ТАНГЕНСА ДЛЯ #{a}"
-		ensure
-			a += dA
+	a = angle_start
+	r = 1
+	
+	while r <= radius
+		ray = []
+
+		while a <= angle_end do
+			begin
+				k = Math.tan( g2r(a) )
+				x = Math.sqrt( r**2 / (k**2 + 1) )
+				y = k*x
+
+				ray << fix_signs(a,x,y)
+			rescue
+				puts "НЕТ ТАНГЕНСА ДЛЯ #{a}"
+			ensure
+				a += dA
+			end
 		end
+
+		all_rays << ray
+
+		a = angle_start
+		r += 1
 	end
 
-	return store
+	all_rays.transpose
 end
 
-calc_rays_template(ARGV[0].to_i).each do |xy| puts "#{xy}" end
+
+case ARGV.count
+when 1
+	radius = ARGV[0].to_i
+else
+	STDERR.write("Usage: #{__FILE__} <radius>\n")
+	exit 1
+end
+
+rays_template = calc_rays_template(radius)
+
+img = Image.new(radius*2, radius*2) { self.background_color='turquoise' }
+draw = Draw.new.fill('black')
+
+rays_template.each do |ray|
+	#puts "ray: #{ray}"
+	ray.each do |dot|
+		#puts "line: #{radius},#{radius},#{radius+dot[0]},#{radius+dot[1]}"
+		draw.line(radius,radius,radius+dot[0],radius+dot[1])
+	end
+end
+
+draw.draw(img)
+img.display
