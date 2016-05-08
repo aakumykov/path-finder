@@ -20,20 +20,14 @@ data.map! { |e|
 	(e > limit) ? e : 0
 }
 
-#e_prev = nil
-#data = data.map {|e|
-#	if (0==e && 0==e_prev.nil?)
-#		nil
-#	else
-#		e
-#	end
-#	e_prev = e
-#}
-#data.compact!
-
+e_prev = nil
 data.map! {|e|
-	0==e ? nil : e
+	current = (0==e && [0,nil].include?(e_prev)) ? nil : e
+	e_prev = current
 }
+data.compact!
+
+data.pop if 0==data.last
 
 data.each { |a|
 	#bar = 0==a ? '0' : '#'*a
@@ -53,4 +47,5 @@ data.each { |a|
 		puts bar
 	end
 }
+
 
