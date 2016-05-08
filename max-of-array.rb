@@ -38,7 +38,7 @@ data.each { |a|
 	when 0
 		bar = '0'
 	else
-		bar = '#'*a
+		bar = '#'*a+"(#{a})"
 	end
 
 	if a.to_f > limit 
@@ -48,4 +48,17 @@ data.each { |a|
 	end
 }
 
+data_chunks = []
+seq = []
+data.each {|e|
+	if 0==e
+		data_chunks << seq
+		seq = []
+	else
+		seq << e
+	end
+}
+data_chunks << seq
+seq = []
 
+puts data_chunks.inspect
