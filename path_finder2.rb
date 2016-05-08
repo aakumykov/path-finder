@@ -7,12 +7,17 @@ include Magick
 class PathFinder
 	def initialize(img_file)
 		@img = ImageList.new(img_file).first
-		puts "image width: #{@img.columns}"
-		puts "image height: #{@img.rows}"
+		@img_width = @img.columns
+		@img_height = @img.rows
+		
+		puts "image width: #{@img_width}"
+		puts "image height: #{@img_height}"
 	end
 
 	def find_path(start_x, start_y, opt={})
 		puts "#{__method__}(#{start_x},#{start_y})"
+
+		
 
 		# предварительная настройка
 		search_radius = opt.fetch(:radius,10)
