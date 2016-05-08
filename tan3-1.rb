@@ -10,6 +10,7 @@ def calc_rays_template(radius,opt={})
 	angle_end = opt.fetch(:angle_end,359)
 
 	dA = 360/(radius*2)
+	#dA = 360/(radius)
 
 	# служебные функции
 	def g2r(n)
@@ -95,7 +96,11 @@ draw = Draw.new.fill('black')
 
 rays_template.each do |ray|
 	#puts "ray: #{ray}"
+	puts ''
+	puts 'RAY:'
 	ray.each do |dot|
+		puts "VDOT: #{dot}"
+		puts "RDOT: #{radius+dot[0]},#{radius+dot[1]}"
 		#puts "line: #{radius},#{radius},#{radius+dot[0]},#{radius+dot[1]}"
 		draw.line(radius,radius,radius+dot[0],radius+dot[1])
 	end
