@@ -62,3 +62,11 @@ data_chunks << seq
 seq = []
 
 puts data_chunks.inspect
+
+data_chunks.each {|chunk|
+	mean = chunk.reduce(:+)/chunk.size.to_f
+	print "#{chunk}: ".blue
+	puts mean
+}
+
+
