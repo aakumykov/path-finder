@@ -24,12 +24,12 @@ class PathFinder
 
 		@rays_template = calc_rays_template(search_radius)
 		
-		puts @rays_template.count
+		puts "@rays_template.size: #{@rays_template.size}"
 		#@rays_template.each_with_index { |r,index| 
 			#puts "ray #{index}"
 			#r.each { |dot| puts "#{dot}" }; puts ''
 		#}
-		exit
+		#exit
 
 		# получение массива шагов
 		x,y = start_x, start_y
@@ -49,12 +49,6 @@ class PathFinder
 
 	private
 
-		# returns:
-		# {
-		#   x: x,
-		#   y: y,
-		#   angle: an angle,
-		# }
 		def calc_rays_template(radius,opt={})
 			puts "#{__method__}(#{radius},#{opt})"
 			
@@ -142,7 +136,7 @@ class PathFinder
 				end
 			end
 			
-			puts all_rays
+			puts "all_rays:"; puts all_rays
 			
 			return all_rays
 		end
@@ -152,6 +146,7 @@ class PathFinder
 
 			# собираю лучи
 			all_rays = get_all_rays(x,y)
+			puts ''; puts "all_rays: #{all_rays}"
 			#puts "all_rays:"; all_rays.each { |r| puts "#{r}" }
 
 			# нахожу "лучший"
@@ -166,32 +161,43 @@ class PathFinder
 			puts "#{__method__}(#{x0},#{y0})"
 			
 			all_rays = []
-			one_ray = {}
 			
 			for ray in @rays_template do
-				#puts "ray: #{ray}"
-				puts ''
-				
-				for dot in ray do
-				 	# puts "dot: #{dot}"
+				#puts ''
+				puts "ray: #{ray}"
+
+				for dot in ray[:dots] do
+				 	#puts ''
+				 	puts "dot: #{dot}"
 
 				  	x = x0+dot[:x]
 				  	y = y0+dot[:y]
 					
-				  	puts "RAY DOT: template: #{dot[:x]},#{dot[:y]}, real: #{x}, #{y}"
+				  	#puts "RAY DOT: template: #{dot[:x]},#{dot[:y]}, real: #{x}, #{y}"
 					
-				 	pix = @img.get_pixels(x,y,1,1).first
+					#puts "@img.pixel_color(#{x},#{y})"
+				 	
+		 			colors = @img.pixel_color(x,y)
+					
+					pixel_weight = (65535-colors.red) + (65535-colors.green) + (65535-colors.blue)
 
-				 	dot[:red] = pix.red
-				 	dot[:green] = pix.green
-				 	dot[:blue] = pix.blue
-					
-				# 	all_rays << { 
-				# 		x: x, 
-				# 		y: y, 
-				# 		weight: pix.red + pix.green + pix.blue
-				# 	}
+					one_ray = { 
+						angle: ray[:angle],
+						radius: ray[:radius],
+						x: x, 
+						y: y, 
+						color: {
+							red: colors.red,
+							green: colors.green,
+							blue: colors.blue,
+						},
+						weight: pixel_weight,
+					}
 				end
+
+				all_rays << one_ray
+
+				one_ray = {}
 			end
 
 			return all_rays
