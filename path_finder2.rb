@@ -14,39 +14,56 @@ class PathFinder
 		puts "image height: #{@img_height}"
 	end
 
-	def find_path(start_x, start_y, opt={})
-		puts "#{__method__}(#{start_x},#{start_y})"
-
+	def find_path(opt={})
 		
+		start_x = opt.fetch(:x)
+		start_y = opt.fetch(:y)
+		search_radius = opt.fetch(:radius)
 
-		# предварительная настройка
-		search_radius = opt.fetch(:radius,10)
+		puts "#{__method__}(x: #{start_x}, y: #{start_y}, radius: #{search_radius})"
+
 		@rays_template = calc_rays_template(search_radius)
-		#puts @rays_template.inspect; exit
+		
+		puts @rays_template.count
+		#@rays_template.each_with_index { |r,index| 
+			#puts "ray #{index}"
+			#r.each { |dot| puts "#{dot}" }; puts ''
+		#}
+		exit
 
 		# получение массива шагов
 		x,y = start_x, start_y
 		all_steps = []
 		
-		while step = get_step(x,y)
-			puts "step: #{step}"
-			all_steps << step
-			x,y = step[0],step[1]
-			puts ''
-		end
+		step = get_step(x,y)
+		
+		#~ while step = get_step(x,y)
+			#~ puts "step: #{step}"
+			#~ all_steps << step
+			#~ x,y = step[0],step[1]
+			#~ puts ''
+		#~ end
 		
 		return all_steps
 	end
 
 	private
 
+		# returns:
+		# {
+		#   x: x,
+		#   y: y,
+		#   angle: an angle,
+		# }
 		def calc_rays_template(radius,opt={})
+			puts "#{__method__}(#{radius},#{opt})"
 			
 			# параметры
 			angle_start = opt.fetch(:angle_start,0)
 			angle_end = opt.fetch(:angle_end,359)
 
-			dA = 360/(radius*2)
+			#angle_step = 360/(radius*2)
+			angle_step = 60 # градус
 
 			# служебные функции
 			def g2r(n)
@@ -88,76 +105,96 @@ class PathFinder
 			all_rays = []
 
 			a = angle_start
-			r = 1
 			
-			while r <= radius
-				ray = []
+			while a <= angle_end do
+				begin
+					puts "angle: #{a}"
 
-				while a <= angle_end do
-					begin
+					r = 1
+					dots = []
+
+					while r <= radius do
 						k = Math.tan( g2r(a) )
 						x = Math.sqrt( r**2 / (k**2 + 1) )
 						y = k*x
 
-						ray << fix_signs(a,x,y)
-					rescue
-						puts "НЕТ ТАНГЕНСА ДЛЯ #{a}"
-					ensure
-						a += dA
+						x,y = fix_signs(a,x,y)
+
+						dots << {
+							x: x,
+							y: y,
+						}
+						
+						r += 1
 					end
+					
+					all_rays << {
+						angle: a,
+						radius: radius,
+						dots: dots,
+					}
+
+					dots = []
+				rescue
+					puts "НЕТ ТАНГЕНСА ДЛЯ #{a}"
+				ensure
+					a += angle_step
 				end
-
-				all_rays << ray
-
-				a = angle_start
-				r += 1
 			end
-
-			all_rays.transpose
+			
+			puts all_rays
+			
+			return all_rays
 		end
 
 		def get_step(x,y)
 			puts "#{__method__}(#{x},#{y})"
 
-			# получаю данные всех лучей
+			# собираю лучи
 			all_rays = get_all_rays(x,y)
-			puts "all_rays:"; all_rays.each { |r| puts "#{r}" }
+			#puts "all_rays:"; all_rays.each { |r| puts "#{r}" }
 
 			# нахожу "лучший"
-			best_ray = detect_best_ray(all_rays)
-			puts "best_ray: #{best_ray}"
-			exit
+			#~ best_ray = detect_best_ray(all_rays)
+			#~ puts "best_ray: #{best_ray}"
+			#~ exit
 
-			return best_ray
+			#~ return best_ray
 		end
 
-		# возвращает массив хэшей
 		def get_all_rays(x0,y0)
 			puts "#{__method__}(#{x0},#{y0})"
 			
-			rays = []
+			all_rays = []
+			one_ray = {}
 			
-			for one_ray in @rays_template do
-				#puts "one_ray: #{one_ray}"
+			for ray in @rays_template do
+				#puts "ray: #{ray}"
+				puts ''
 				
-				for ray_dot in one_ray do
+				for dot in ray do
+				 	# puts "dot: #{dot}"
 
-					x = x0+ray_dot[0]
-					y = y0+ray_dot[1]
+				  	x = x0+dot[:x]
+				  	y = y0+dot[:y]
 					
-					# puts "RAY DOT: template: #{ray_dot}, real: #{x}, #{y}"
+				  	puts "RAY DOT: template: #{dot[:x]},#{dot[:y]}, real: #{x}, #{y}"
 					
-					pix = @img.get_pixels(x,y,1,1).first
+				 	pix = @img.get_pixels(x,y,1,1).first
+
+				 	dot[:red] = pix.red
+				 	dot[:green] = pix.green
+				 	dot[:blue] = pix.blue
 					
-					rays << { 
-						x: x, 
-						y: y, 
-						weight: pix.red + pix.green + pix.blue
-					}
+				# 	all_rays << { 
+				# 		x: x, 
+				# 		y: y, 
+				# 		weight: pix.red + pix.green + pix.blue
+				# 	}
 				end
 			end
 
-			return rays
+			return all_rays
 		end
 
 		def detect_best_ray(rays_bunch)
@@ -178,5 +215,5 @@ else
 end
 
 pf = PathFinder.new(img_file)
-path = pf.find_path(9,9)
+path = pf.find_path(x: 6, y: 6, radius: 5)
 puts "path: #{path.inspect}"
