@@ -10,8 +10,7 @@ class PathFinder
 		@img_width = @img.columns
 		@img_height = @img.rows
 		
-		puts "image width: #{@img_width}"
-		puts "image height: #{@img_height}"
+		puts "image: #{@img_width}x#{@img_height}"
 	end
 
 	def find_path(opt={})
@@ -57,7 +56,7 @@ class PathFinder
 			angle_end = opt.fetch(:angle_end,359)
 
 			#angle_step = 360/(radius*2)
-			angle_step = 60 # градус
+			angle_step = 30 # градус
 
 			# служебные функции
 			def g2r(n)
@@ -102,12 +101,14 @@ class PathFinder
 			
 			while a <= angle_end do
 				begin
-					puts "angle: #{a}"
+					#puts "angle: #{a}"
 
 					r = 1
 					dots = []
 
 					while r <= radius do
+						#puts "radius: #{r}"
+
 						k = Math.tan( g2r(a) )
 						x = Math.sqrt( r**2 / (k**2 + 1) )
 						y = k*x
@@ -136,7 +137,7 @@ class PathFinder
 				end
 			end
 			
-			puts "all_rays:"; puts all_rays
+			#puts "rays template:"; puts all_rays
 			
 			return all_rays
 		end
@@ -146,8 +147,17 @@ class PathFinder
 
 			# собираю лучи
 			all_rays = get_all_rays(x,y)
-			puts ''; puts "all_rays: #{all_rays}"
-			#puts "all_rays:"; all_rays.each { |r| puts "#{r}" }
+			
+			all_rays.each_with_index { |ray,index|
+				#puts "ray #{index}: #{ray.weight}"
+				puts ''; puts "ray #{index}:"
+				
+				ray.dots.each_with_index { |dot,index|
+					puts dot.inspect
+				}
+			}
+			
+			exit
 
 			# нахожу "лучший"
 			#~ best_ray = detect_best_ray(all_rays)
@@ -162,42 +172,33 @@ class PathFinder
 			
 			all_rays = []
 			
-			for ray in @rays_template do
-				#puts ''
-				puts "ray: #{ray}"
-
-				for dot in ray[:dots] do
-				 	#puts ''
-				 	puts "dot: #{dot}"
-
-				  	x = x0+dot[:x]
-				  	y = y0+dot[:y]
+			for one_ray_template in @rays_template do
+				#puts ''; puts "checked ray: #{ray}"
+				
+				one_ray = Ray.new(
+					angle: one_ray_template[:angle],
+					radius: one_ray_template[:radius],
+				)
+				
+				dots = []
+				for dot in one_ray_template[:dots] do
+				 	#puts "dot: #{dot.class}, #{dot[:x].class}, #{dot[:y].class}, #{x0.class}, #{y0.class}"
+				 	#next
 					
-				  	#puts "RAY DOT: template: #{dot[:x]},#{dot[:y]}, real: #{x}, #{y}"
+					x = x0 + dot[:x]
+					y = y0 + dot[:y]
+					color = @img.pixel_color(x,y)
 					
-					#puts "@img.pixel_color(#{x},#{y})"
-				 	
-		 			colors = @img.pixel_color(x,y)
-					
-					pixel_weight = (65535-colors.red) + (65535-colors.green) + (65535-colors.blue)
-
-					one_ray = { 
-						angle: ray[:angle],
-						radius: ray[:radius],
-						x: x, 
-						y: y, 
-						color: {
-							red: colors.red,
-							green: colors.green,
-							blue: colors.blue,
-						},
-						weight: pixel_weight,
-					}
+					dots << Dot.new(
+						x: x,
+						y: y,
+						color: color,
+					)
 				end
+				
+				one_ray.dots = dots
 
 				all_rays << one_ray
-
-				one_ray = {}
 			end
 
 			return all_rays
@@ -212,14 +213,59 @@ class PathFinder
 		end
 end
 
+class Ray
+	attr_reader :weight, :dots
+	
+	def initialize(opt={})
+		#puts ''; puts "#{self.class}.#{__method__}(#{opt})"
+		@angle = opt.fetch(:angle)
+		@radius = opt.fetch(:radius)
+		@dots = nil
+		@weight = 0
+	end
+	
+	def dots=(dots_array)
+		#puts "#{self.class}.#{__method__}(dots_array.size: #{dots_array.size})"
+		@dots = dots_array
+		calc_weight
+		#puts "ray weight: #{self.weight}"
+	end
+	
+	private
+		def calc_weight
+			#puts "#{self.class}.#{__method__}()"
+			@dots.each { |one_dot|
+				@weight += one_dot.weight
+				#puts "one_dot.weight: #{one_dot.weight}, weight: #{weight}"
+			}
+		end
+end
+
+class Dot
+	attr_reader :x, :y, :color, :weight
+	
+	def initialize(opt={})
+		#puts "#{self.class}.#{__method__}(#{opt})"
+		@x = opt.fetch(:x)
+		@y = opt.fetch(:y)
+		@color = opt.fetch(:color)
+		@weight = @color.red + @color.green + @color.blue
+		#puts "dot weight: #{@weight}"
+	end
+end
+
+
 case ARGV.count
-when 1
+when 4
 	img_file = ARGV[0]
+	start_x = ARGV[1].to_i
+	start_y = ARGV[2].to_i
+	search_radius = ARGV[3].to_i
 else
-	STDERR.write("Usage: #{__FILE__} <img_file>\n")
+	STDERR.write("Usage: #{__FILE__} <img_file> <start_x> <start_y> <search_radius>\n")
 	exit 1
 end
 
 pf = PathFinder.new(img_file)
-path = pf.find_path(x: 6, y: 6, radius: 5)
+path = pf.find_path(x: start_x, y: start_y, radius: search_radius)
 puts "path: #{path.inspect}"
