@@ -154,7 +154,7 @@ class PathFinder
 			
 			all_rays.each_with_index { |ray,index|
 				#puts "ray #{index}: #{ray.weight}"
-				#puts ''; puts "ray #{index}:"
+				puts ''; puts "ray #{index}:"
 				
 				ray.dots.each_with_index { |dot,index|
 					#puts dot.inspect
