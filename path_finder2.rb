@@ -219,6 +219,11 @@ class PathFinder
 
 			[ray[:x], ray[:y]]
 		end
+		
+		def self.rgb2grayscale(r,g,b)
+			r*0.299 + g*0.587 + b*0.114
+			#r*0.2126 + g*0.7152 + b*0.0722
+		end
 end
 
 class Ray
@@ -257,6 +262,7 @@ class Dot
 		@y = opt.fetch(:y)
 		@color = opt.fetch(:color)
 		@weight = (65535-@color.red) + (65535-@color.green) + (65535-@color.blue)
+		#@weight = PathFinder::rgb2grayscale(@color.red,@color.green,@color.blue)
 		#puts "dot weight: #{@weight}"
 	end
 end
