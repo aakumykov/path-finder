@@ -150,19 +150,20 @@ class PathFinder
 			# собираю лучи
 			all_rays = get_all_rays(x,y)
 			
-			#@img2 = Image.new(@img_width,@img_height) { self.background_color = 'white' }
+			@img2 = Image.new(@img_width,@img_height) { self.background_color = 'white' }
 			
 			all_rays.each_with_index { |ray,index|
 				#puts "ray #{index}: #{ray.weight}"
-				puts ''; puts "ray #{index}:"
+				#puts ''; 
+				puts "ray #{index}\t a:#{ray.angle}\t #{ray.weight}"
 				
 				ray.dots.each_with_index { |dot,index|
 					#puts dot.inspect
-					#@img2.pixel_color(dot.x, dot.y, dot.color)
+					@img2.pixel_color(dot.x, dot.y, dot.color)
 				}
 			}
 			#@img.display
-			#@img2.display
+			@img2.display
 			
 			exit
 
@@ -221,7 +222,7 @@ class PathFinder
 end
 
 class Ray
-	attr_reader :weight, :dots
+	attr_reader :angle, :radius, :weight, :dots
 	
 	def initialize(opt={})
 		#puts ''; puts "#{self.class}.#{__method__}(#{opt})"
@@ -243,7 +244,6 @@ class Ray
 			#puts "#{self.class}.#{__method__}()"
 			@dots.each { |one_dot|
 				@weight += one_dot.weight
-				#puts "one_dot.weight: #{one_dot.weight}, weight: #{weight}"
 			}
 		end
 end
@@ -256,7 +256,7 @@ class Dot
 		@x = opt.fetch(:x)
 		@y = opt.fetch(:y)
 		@color = opt.fetch(:color)
-		@weight = @color.red + @color.green + @color.blue
+		@weight = (65535-@color.red) + (65535-@color.green) + (65535-@color.blue)
 		#puts "dot weight: #{@weight}"
 	end
 end
