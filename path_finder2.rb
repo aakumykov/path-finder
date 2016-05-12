@@ -56,7 +56,9 @@ class PathFinder
 			angle_end = opt.fetch(:angle_end,359)
 
 			#angle_step = 360/(radius*2)
-			angle_step = 30 # градус
+			angle_step = 10 # градус
+			
+			raise "angle_step must be > 0" if angle_step <= 0
 
 			# служебные функции
 			def g2r(n)
@@ -148,14 +150,19 @@ class PathFinder
 			# собираю лучи
 			all_rays = get_all_rays(x,y)
 			
+			#@img2 = Image.new(@img_width,@img_height) { self.background_color = 'white' }
+			
 			all_rays.each_with_index { |ray,index|
 				#puts "ray #{index}: #{ray.weight}"
-				puts ''; puts "ray #{index}:"
+				#puts ''; puts "ray #{index}:"
 				
 				ray.dots.each_with_index { |dot,index|
-					puts dot.inspect
+					#puts dot.inspect
+					#@img2.pixel_color(dot.x, dot.y, dot.color)
 				}
 			}
+			#@img.display
+			#@img2.display
 			
 			exit
 
